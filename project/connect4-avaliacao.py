@@ -211,7 +211,7 @@ turn = 0
 
 clear()
 
-nos_explorados = 0
+explored_nodes = 0
 
 while not game_over:
     # Movimento do Jogador 1
@@ -244,10 +244,10 @@ while not game_over:
                 evaluation = evaluate(board, 2)
                 print("Avaliação do tabuleiro:", evaluation)
 
-    nos_explorados += nos_explorados_contador(board, 4, turn == 1)
+    explored_nodes += nos_explorados_contador(board, 4, turn == 1)
     print(board)
     print(" ")
     turn += 1
     turn = turn % 2
 
-print("Número de nós explorados:", nos_explorados)
+print("Número total de nós explorados:", explored_nodes)
