@@ -3,8 +3,8 @@
 import numpy as np
 from os import system, name
 
-ROWS = 7
-COLUMNS = 6
+ROWS = 6
+COLUMNS = 7
 
 # ----------------------------------------------------------------------------------
 
