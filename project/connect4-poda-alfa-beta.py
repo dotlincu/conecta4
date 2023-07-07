@@ -3,13 +3,13 @@
 import numpy as np
 from os import system, name
 
-ROWS = 6
-COLUMNS = 7
+ROWS = 7
+COLUMNS = 6
 
 # ----------------------------------------------------------------------------------
 
 
-def count_explored_nodes(board, depth, maximizing_player):
+def nos_explorados_contador(board, depth, maximizing_player):
     if is_winning_move(board, 2) or is_winning_move(board, 1) or len(get_valid_locations(board)) == 0 or depth == 0:
         return 1
 
@@ -19,12 +19,13 @@ def count_explored_nodes(board, depth, maximizing_player):
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 2)
-            total_nodes += count_explored_nodes(temp_board, depth - 1, False)
+            total_nodes += nos_explorados_contador(
+                temp_board, depth - 1, False)
     else:
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 1)
-            total_nodes += count_explored_nodes(temp_board, depth - 1, True)
+            total_nodes += nos_explorados_contador(temp_board, depth - 1, True)
 
     return total_nodes
 
@@ -154,7 +155,7 @@ turn = 0
 
 clear()
 
-explored_nodes = 0
+nos_explorados = 0
 
 while not game_over:
     # Movimento do Jogador 1
@@ -184,10 +185,10 @@ while not game_over:
                 print("Jogador 2 Vence!!!")
                 game_over = True
 
-    explored_nodes += count_explored_nodes(board, 4, turn == 1)
+    nos_explorados += nos_explorados_contador(board, 4, turn == 1)
     print(board)
     print(" ")
     turn += 1
     turn = turn % 2
 
-print("Número total de nós explorados:", explored_nodes)
+print("Número de nós explorados:", nos_explorados)
