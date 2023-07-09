@@ -1,4 +1,4 @@
-# CÓDIGO COM HEURISTICA
+# CÓDIGO AVALIAÇÃO HEURÍSTICA
 
 import numpy as np
 from os import system, name
@@ -9,7 +9,7 @@ COLUMNS = 7
 # ----------------------------------------------------------------------------------
 
 
-def nos_explorados_contador(board, depth, maximizing_player):
+def count_nodes(board, depth, maximizing_player):
     if is_winning_move(board, 2) or is_winning_move(board, 1) or len(get_valid_locations(board)) == 0 or depth == 0:
         return 1
 
@@ -19,18 +19,20 @@ def nos_explorados_contador(board, depth, maximizing_player):
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 2)
-            total_nodes += nos_explorados_contador(
-                temp_board, depth - 1, False)
+            total_nodes += count_nodes(temp_board, depth - 1, False)
     else:
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 1)
-            total_nodes += nos_explorados_contador(temp_board, depth - 1, True)
+            total_nodes += count_nodes(temp_board, depth - 1, True)
 
     return total_nodes
 
 
+
 # ----------------------------------------------------------------------------------
+
+
 def clear():
     # para windows
     if name == 'nt':
@@ -51,11 +53,11 @@ def create_board():
 
 
 def valid_location(board, column):
-    return board[ROWS - 1][column] == 0
+    if column >= 0 and column <= ROWS:
+        return board[ROWS - 1][column] == 0
+
 
 # ----------------------------------------------------------------------------------
-
-
 def drop_piece(board, column, piece):
     for r in range(ROWS):
         if board[r][column] == 0:
@@ -92,104 +94,109 @@ def is_winning_move(board, piece):
 
 
 def minimax(board, depth, maximizing_player):
-    if is_winning_move(board, 2):  # IA ganhou
-        return (None, 100)
-    elif is_winning_move(board, 1):  # jogador humano ganhou
-        return (None, -100)
-    elif len(get_valid_locations(board)) == 0:  # jogo empatado
-        return (None, 0)
-    elif depth == 0:  # profundidade máxima atingida
-        return (None, 0)
+    if is_winning_move(board, 2):  # AI wins
+        return (None, 100, 1)  # Return 1 as the node count for a winning move
+    elif is_winning_move(board, 1):  # human player wins
+        return (None, -100, 1)  # Return 1 as the node count for a winning move
+    elif len(get_valid_locations(board)) == 0:  # game tied
+        return (None, 0, 1)  # Return 1 as the node count for a tied game
+    elif depth == 0:  # maximum depth reached
+        return (None, evaluate_board(board)[0], 1)  # Use the first element of the tuple (score) from evaluate_board
 
     valid_locations = get_valid_locations(board)
     if maximizing_player:
         value = -np.Inf
         column = np.random.choice(valid_locations)
+        total_nodes = 1  # Initialize total node count to 1 for the current node
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 2)
-            new_score = minimax(temp_board, depth - 1, False)[1]
+            new_score, new_nodes = minimax(temp_board, depth - 1, False)[1:]  # Ignore the first element (column)
             if new_score > value:
                 value = new_score
                 column = col
-        return column, value
+            total_nodes += new_nodes
+        return column, value, total_nodes
 
     else:  # minimizing player
         value = np.Inf
         column = np.random.choice(valid_locations)
+        total_nodes = 1  # Initialize total node count to 1 for the current node
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 1)
-            new_score = minimax(temp_board, depth - 1, True)[1]
+            new_score, new_nodes = minimax(temp_board, depth - 1, True)[1:]  # Ignore the first element (column)
             if new_score < value:
                 value = new_score
                 column = col
-        return column, value
-
-# ----------------------------------------------------------------------------------
-# FUNÇÕES QUE IRÃO SUBSTITUIR A FUNÇÃO DE UTILIDADE E O TESTE DE TÉRMINO
+            total_nodes += new_nodes
+        return column, value, total_nodes
 
 
-def evaluate_position(board, player):
+def evaluate_board(board):
+    # Evaluate the board state and assign a score
     score = 0
+    nodes_explored = 1  # Initialize node count to 1 for the current board state
 
-    # Avaliar sequências horizontais
-    for row in range(ROWS):
-        for col in range(COLUMNS - 3):
-            sequence = board[row, col:col + 4]
-            score += evaluate_sequence(sequence, player)
+    # Evaluate rows
+    for r in range(ROWS):
+        row = board[r]
+        for c in range(COLUMNS - 3):
+            window = row[c:c+4]
+            score += evaluate_window(window)
+            nodes_explored += 1  # Increment node count for each evaluated window
 
-    # Avaliar sequências verticais
-    for col in range(COLUMNS):
-        for row in range(ROWS - 3):
-            sequence = board[row:row + 4, col]
-            score += evaluate_sequence(sequence, player)
+    # Evaluate columns
+    for c in range(COLUMNS):
+        column = board[:, c]
+        for r in range(ROWS - 3):
+            window = column[r:r+4]
+            score += evaluate_window(window)
+            nodes_explored += 1  # Increment node count for each evaluated window
 
-    # Avaliar sequências diagonais (para a direita e para a esquerda)
-    for row in range(ROWS - 3):
-        for col in range(COLUMNS - 3):
-            sequence = [board[row + i, col + i] for i in range(4)]
-            score += evaluate_sequence(sequence, player)
+    # Evaluate diagonals (positive slope)
+    for r in range(ROWS - 3):
+        for c in range(COLUMNS - 3):
+            window = [board[r+i][c+i] for i in range(4)]
+            score += evaluate_window(window)
+            nodes_explored += 1  # Increment node count for each evaluated window
 
-            sequence = [board[row + i, col + 3 - i] for i in range(4)]
-            score += evaluate_sequence(sequence, player)
+    # Evaluate diagonals (negative slope)
+    for r in range(3, ROWS):
+        for c in range(COLUMNS - 3):
+            window = [board[r-i][c+i] for i in range(4)]
+            score += evaluate_window(window)
+            nodes_explored += 1  # Increment node count for each evaluated window
 
-    return score
+    return score, nodes_explored
 
-
-def evaluate_sequence(sequence, player):
+def evaluate_window(window):
+    # Evaluate a window of 4 consecutive cells
     score = 0
-    # Identificar o oponente (1 para o jogador 2, 2 para o jogador 1)
-    opponent = 3 - player
+    player_pieces = 0
+    opponent_pieces = 0
 
-    if sequence.
-    (player) == 4:
+    for piece in window:
+        if piece == 1:
+            player_pieces += 1
+        elif piece == 2:
+            opponent_pieces += 1
+
+    if player_pieces == 4:
         score += 100
-    elif sequence.count(player) == 3 and sequence.count(0) == 1:
+    elif player_pieces == 3 and opponent_pieces == 0:
         score += 5
-    elif sequence.count(player) == 2 and sequence.count(0) == 2:
+    elif player_pieces == 2 and opponent_pieces == 0:
         score += 2
-
-    if sequence.count(opponent) == 3 and sequence.count(0) == 1:
+    elif opponent_pieces == 3 and player_pieces == 0:
         score -= 4
 
     return score
 
 
-def evaluate(board, player):
-    # Avaliar a posição do jogador
-    player_score = evaluate_position(board, player)
-
-    # Avaliar a posição do oponente
-    # Identificar o oponente (1 para o jogador 2, 2 para o jogador 1)
-    opponent = 3 - player
-    opponent_score = evaluate_position(board, opponent)
-
-    # Retornar a diferença entre as pontuações do jogador e do oponente
-    return player_score - opponent_score
-
-
 # ----------------------------------------------------------------------------------
+
+
 def get_valid_locations(board):
     valid_locations = []
     for col in range(COLUMNS):
@@ -203,20 +210,19 @@ def get_valid_locations(board):
 # Programa Principal
 # Data: 06/05/2023
 # ----------------------------------------------------------------------------------
-
-print("CONECTA4 COM AVALIAÇÃO HEURÍSTICA")
+print("CONECTA4 COM PADRÃO SIMPLES")
 board = create_board()
 game_over = False
 turn = 0
 
 clear()
 
-explored_nodes = 0
+# nos_explorados = 0
 
 while not game_over:
     # Movimento do Jogador 1
     if turn == 0:
-        col = int(input("Jogador 1, selecione a coluna (0-6):"))
+        col = int(input("Jogador 1, selecione a coluna (0-6): "))
         if valid_location(board, col):
             drop_piece(board, col, 1)
             if is_winning_move(board, 1):
@@ -224,8 +230,7 @@ while not game_over:
                 game_over = True
         else:
             while not valid_location(board, col):
-                col = int(
-                    input("Não disponível! Jogador1, selecione a coluna (0-6):"))
+                col = int(input("Não disponível! Jogador1, selecione a coluna (0-6):"))
                 if valid_location(board, col):
                     drop_piece(board, col, 1)
                     if is_winning_move(board, 1):
@@ -234,20 +239,18 @@ while not game_over:
 
     # Movimento da IA
     else:
-        col, minimax_score = minimax(board, 4, True)
+        col, minimax_score, nodes = minimax(board, 5, True)
         if valid_location(board, col):
             drop_piece(board, col, 2)
             if is_winning_move(board, 2):
                 print("Jogador 2 Vence!!!")
                 game_over = True
-            else:
-                evaluation = evaluate(board, 2)
-                print("Avaliação do tabuleiro:", evaluation)
 
-    explored_nodes += nos_explorados_contador(board, 4, turn == 1)
+    # nos_explorados += count_nodes(board, 4, turn == 1)
+
     print(board)
     print(" ")
     turn += 1
     turn = turn % 2
 
-print("Número total de nós explorados:", explored_nodes)
+print("Número de nós explorados:", nodes)
