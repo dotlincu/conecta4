@@ -6,29 +6,6 @@ from os import system, name
 ROWS = 6
 COLUMNS = 7
 
-# ----------------------------------------------------------------------------------
-
-
-def count_nodes(board, depth, maximizing_player):
-    if is_winning_move(board, 2) or is_winning_move(board, 1) or len(get_valid_locations(board)) == 0 or depth == 0:
-        return 1
-
-    total_nodes = 0
-    valid_locations = get_valid_locations(board)
-    if maximizing_player:
-        for col in valid_locations:
-            temp_board = board.copy()
-            drop_piece(temp_board, col, 2)
-            total_nodes += count_nodes(temp_board, depth - 1, False)
-    else:
-        for col in valid_locations:
-            temp_board = board.copy()
-            drop_piece(temp_board, col, 1)
-            total_nodes += count_nodes(temp_board, depth - 1, True)
-
-    return total_nodes
-
-
 
 # ----------------------------------------------------------------------------------
 
@@ -245,8 +222,6 @@ while not game_over:
             if is_winning_move(board, 2):
                 print("Jogador 2 Vence!!!")
                 game_over = True
-
-    # nos_explorados += count_nodes(board, 4, turn == 1)
 
     print(board)
     print(" ")
