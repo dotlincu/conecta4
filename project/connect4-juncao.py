@@ -6,9 +6,7 @@ from os import system, name
 ROWS = 6
 COLUMNS = 7
 
-
 # ----------------------------------------------------------------------------------
-
 
 def clear():
     # para windows
@@ -71,20 +69,20 @@ def is_winning_move(board, piece):
 
 
 def minimax(board, depth, alpha, beta, maximizing_player):
-    if is_winning_move(board, 2):  # AI wins
-        return (None, 100, 1)  # Return 1 as the node count for a winning move
-    elif is_winning_move(board, 1):  # human player wins
-        return (None, -100, 1)  # Return 1 as the node count for a winning move
-    elif len(get_valid_locations(board)) == 0:  # game tied
-        return (None, 0, 1)  # Return 1 as the node count for a tied game
-    elif depth == 0:  # maximum depth reached
-        return (None, evaluate_board(board)[0], 1)  # Use the first element of the tuple (score) from evaluate_board
+    if is_winning_move(board, 2):  # IA vence
+        return (None, 100, 1)  # retorna 1 como a contagem de nós para uma jogada vencedora
+    elif is_winning_move(board, 1):  # jogador humano vence
+        return (None, -100, 1)  # retorna 1 como a contagem de nós para uma jogada vencedora
+    elif len(get_valid_locations(board)) == 0:  # jogo empatado
+        return (None, 0, 1)  # retorna 1 como a contagem de nós para um jogo empatado
+    elif depth == 0:  # profundidade máxima atingida
+        return (None, evaluate_board(board)[0], 1)  # usa a função de avaliação heurística para avaliar o tabuleiro atual
 
     valid_locations = get_valid_locations(board)
     if maximizing_player:
         value = -np.Inf
         column = np.random.choice(valid_locations)
-        total_nodes = 1  # Initialize total node count to 1 for the current node
+        total_nodes = 1  # inicializa a contagem de nós para 1 para o nó atual
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 2)
@@ -101,7 +99,7 @@ def minimax(board, depth, alpha, beta, maximizing_player):
     else:  # minimizing player
         value = np.Inf
         column = np.random.choice(valid_locations)
-        total_nodes = 1  # Initialize total node count to 1 for the current node
+        total_nodes = 1  # inicializa a contagem de nós para 1 para o nó atual
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 1)
@@ -117,44 +115,44 @@ def minimax(board, depth, alpha, beta, maximizing_player):
 
 
 def evaluate_board(board):
-    # Evaluate the board state and assign a score
+    # avalia o tabuleiro atual, retorna uma pontuação e o número de nós explorados
     score = 0
-    nodes_explored = 1  # Initialize node count to 1 for the current board state
+    nodes_explored = 1  # inicializa a contagem de nós para 1 para o nó atual
 
-    # Evaluate rows
+    # avalia linhas
     for r in range(ROWS):
         row = board[r]
         for c in range(COLUMNS - 3):
             window = row[c:c+4]
             score += evaluate_window(window)
-            nodes_explored += 1  # Increment node count for each evaluated window
+            nodes_explored += 1  # incrementa a contagem de nós para cada janela avaliada
 
-    # Evaluate columns
+    # avalia colunas
     for c in range(COLUMNS):
         column = board[:, c]
         for r in range(ROWS - 3):
             window = column[r:r+4]
             score += evaluate_window(window)
-            nodes_explored += 1  # Increment node count for each evaluated window
+            nodes_explored += 1  # incrementa a contagem de nós para cada janela avaliada
 
-    # Evaluate diagonals (positive slope)
+    # avalia diagonais (inclinação positiva)
     for r in range(ROWS - 3):
         for c in range(COLUMNS - 3):
             window = [board[r+i][c+i] for i in range(4)]
             score += evaluate_window(window)
-            nodes_explored += 1  # Increment node count for each evaluated window
+            nodes_explored += 1  # incrementa a contagem de nós para cada janela avaliada
 
-    # Evaluate diagonals (negative slope)
+    # avalia diagonais (inclinação negativa)
     for r in range(3, ROWS):
         for c in range(COLUMNS - 3):
             window = [board[r-i][c+i] for i in range(4)]
             score += evaluate_window(window)
-            nodes_explored += 1  # Increment node count for each evaluated window
+            nodes_explored += 1  # incrementa a contagem de nós para cada janela avaliada
 
     return score, nodes_explored
 
 def evaluate_window(window):
-    # Evaluate a window of 4 consecutive cells
+    #  avalia uma janela de 4 peças
     score = 0
     player_pieces = 0
     opponent_pieces = 0
@@ -189,9 +187,9 @@ def get_valid_locations(board):
 
 
 # ----------------------------------------------------------------------------------
-# CSI457 e CSI701
-# Programa Principal
-# Data: 06/05/2023
+# CSI701
+# Projeto: Implementação de um jogo de tabuleiro com IA
+# Data: 09/07/2023
 # ----------------------------------------------------------------------------------
 print("CONECTA4 COM PADRÃO SIMPLES")
 board = create_board()
@@ -200,10 +198,8 @@ turn = 0
 
 clear()
 
-# nos_explorados = 0
-
 while not game_over:
-    # Movimento do Jogador 1
+    # movimento do Jogador 1
     if turn == 0:
         col = int(input("Jogador 1, selecione a coluna (0-6): "))
         if valid_location(board, col):
@@ -220,7 +216,7 @@ while not game_over:
                         print("Jogador 1 Vence!! Parabéns!!")
                         game_over = True
 
-    # Movimento da IA
+    # movimento da IA
     else:
         col, minimax_score, nodes = minimax(board, 4, -np.Inf, np.Inf, True)
         if valid_location(board, col):
