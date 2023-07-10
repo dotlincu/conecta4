@@ -1,4 +1,4 @@
-# CÓDIGO AVALIAÇÃO HEURÍSTICA
+# CÓDIGO AVALIAÇÃO HEURÍSTICA + PODA ALFA-BETA
 
 import numpy as np
 from os import system, name
@@ -93,7 +93,7 @@ def minimax(board, depth, alpha, beta, maximizing_player):
             total_nodes += new_nodes
             alpha = max(alpha, value)
             if alpha >= beta:
-                break  # Poda Alfa-Beta
+                break  # poda Alfa-Beta
         return column, value, total_nodes
 
     else:  # minimizing player
@@ -110,7 +110,7 @@ def minimax(board, depth, alpha, beta, maximizing_player):
             total_nodes += new_nodes
             alpha = max(alpha, value)
             if alpha >= beta:
-                break  # Poda Alfa-Beta
+                break  # poda Alfa-Beta
         return column, value, total_nodes
 
 
@@ -191,7 +191,7 @@ def get_valid_locations(board):
 # Projeto: Implementação de um jogo de tabuleiro com IA
 # Data: 09/07/2023
 # ----------------------------------------------------------------------------------
-print("CONECTA4 COM PADRÃO SIMPLES")
+print("CONECTA4 COM HEURÍSTICA + PODA ALFA-BETA")
 board = create_board()
 game_over = False
 turn = 0

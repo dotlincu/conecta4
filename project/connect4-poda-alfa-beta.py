@@ -6,9 +6,7 @@ from os import system, name
 ROWS = 6
 COLUMNS = 7
 
-
 # ----------------------------------------------------------------------------------
-
 
 def clear():
     # para windows
@@ -71,12 +69,12 @@ def is_winning_move(board, piece):
 
 # ----------------------------------------------------------------------------------
 def minimax(board, depth, alpha, beta, maximizing_player):
-    if is_winning_move(board, 2):  # IA ganhou
-        return (None, 100, 1)
-    elif is_winning_move(board, 1):  # jogador humano ganhou
-        return (None, -100, 1)
+    if is_winning_move(board, 2):  # IA vence
+        return (None, 100, 1) # retorna um como a contagem de nós para uma jogada vencedora
+    elif is_winning_move(board, 1):  # jogador humano vence
+        return (None, -100, 1) # retorna um como a contagem de nós para uma jogada vencedora
     elif len(get_valid_locations(board)) == 0:  # jogo empatado
-        return (None, 0, 1)
+        return (None, 0, 1) # retorna um como a contagem de nós para uma jogada vencedora
     elif depth == 0:  # profundidade máxima atingida
         return (None, 0, 1)
 
@@ -84,7 +82,7 @@ def minimax(board, depth, alpha, beta, maximizing_player):
     if maximizing_player:
         value = -np.Inf
         column = np.random.choice(valid_locations)
-        total_nodes = 1
+        total_nodes = 1 # inicializa a contagem de nós para o nó atual
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 2)
@@ -95,13 +93,13 @@ def minimax(board, depth, alpha, beta, maximizing_player):
             total_nodes += new_nodes
             alpha = max(alpha, value)
             if alpha >= beta:
-                break  # Poda Alfa-Beta
+                break  # poda Alfa-Beta
         return column, value, total_nodes
 
     else:  # minimizing player
         value = np.Inf
         column = np.random.choice(valid_locations)
-        total_nodes = 1
+        total_nodes = 1 # inicializa a contagem de nós para o nó atual
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 1)
@@ -112,7 +110,7 @@ def minimax(board, depth, alpha, beta, maximizing_player):
             total_nodes += new_nodes
             beta = min(beta, value)
             if alpha >= beta:
-                break  # Poda Alfa-Beta
+                break  # poda Alfa-Beta
         return column, value, total_nodes
 
 
@@ -126,9 +124,9 @@ def get_valid_locations(board):
 
 
 # ----------------------------------------------------------------------------------
-# CSI301
-# Programa Principal
-# Data: 06/05/2023
+# CSI701
+# Projeto: Implementação de um jogo de tabuleiro com IA
+# Data: 09/07/2023
 # ----------------------------------------------------------------------------------
 print("CONECTA4 COM PODA ALFA-BETA")
 board = create_board()
@@ -140,7 +138,7 @@ clear()
 nos_explorados = 0
 
 while not game_over:
-    # Movimento do Jogador 1
+    # movimento do Jogador 1
     if turn == 0:
         col = int(input("Jogador 1, selecione a coluna (0-6):"))
         if valid_location(board, col):
@@ -158,7 +156,7 @@ while not game_over:
                         print("Jogador 1 Vence!! Parabéns!!")
                         game_over = True
 
-    # Movimento da IA
+    # movimento da IA
     else:
         col, minimax_score, nodes = minimax(board, 4, -np.Inf, np.Inf, True)
         if valid_location(board, col):
