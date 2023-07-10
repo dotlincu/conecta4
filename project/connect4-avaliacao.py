@@ -216,7 +216,7 @@ while not game_over:
 
     # Movimento da IA
     else:
-        col, minimax_score, nodes = minimax(board, 5, True)
+        col, minimax_score, nodes = minimax(board, 4, True)
         if valid_location(board, col):
             drop_piece(board, col, 2)
             if is_winning_move(board, 2):

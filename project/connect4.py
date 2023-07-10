@@ -87,25 +87,26 @@ def minimax(board, depth, maximizing_player):
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 2)
-            new_score, new_nodes = minimax(temp_board, depth - 1, False)[1]
+            new_score, new_nodes = minimax(temp_board, depth - 1, False)[1:]
             if new_score > value:
                 value = new_score
                 column = col
             total_nodes += new_nodes
-        return column, value
+        return column, value, total_nodes
 
     else:  # minimizing player
         value = np.Inf
         column = np.random.choice(valid_locations)
+        total_nodes = 1
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 1)
-            new_score, new_nodes = minimax(temp_board, depth - 1, True)[1]
+            new_score, new_nodes = minimax(temp_board, depth - 1, True)[1:]
             if new_score < value:
                 value = new_score
                 column = col
             total_nodes += new_nodes
-        return column, value
+        return column, value, total_nodes
 
 # ----------------------------------------------------------------------------------
 

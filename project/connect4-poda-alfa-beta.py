@@ -6,28 +6,6 @@ from os import system, name
 ROWS = 6
 COLUMNS = 7
 
-# ----------------------------------------------------------------------------------
-
-
-def nos_explorados_contador(board, depth, maximizing_player):
-    if is_winning_move(board, 2) or is_winning_move(board, 1) or len(get_valid_locations(board)) == 0 or depth == 0:
-        return 1
-
-    total_nodes = 0
-    valid_locations = get_valid_locations(board)
-    if maximizing_player:
-        for col in valid_locations:
-            temp_board = board.copy()
-            drop_piece(temp_board, col, 2)
-            total_nodes += nos_explorados_contador(
-                temp_board, depth - 1, False)
-    else:
-        for col in valid_locations:
-            temp_board = board.copy()
-            drop_piece(temp_board, col, 1)
-            total_nodes += nos_explorados_contador(temp_board, depth - 1, True)
-
-    return total_nodes
 
 # ----------------------------------------------------------------------------------
 
@@ -94,44 +72,48 @@ def is_winning_move(board, piece):
 # ----------------------------------------------------------------------------------
 def minimax(board, depth, alpha, beta, maximizing_player):
     if is_winning_move(board, 2):  # IA ganhou
-        return (None, 100)
+        return (None, 100, 1)
     elif is_winning_move(board, 1):  # jogador humano ganhou
-        return (None, -100)
+        return (None, -100, 1)
     elif len(get_valid_locations(board)) == 0:  # jogo empatado
-        return (None, 0)
+        return (None, 0, 1)
     elif depth == 0:  # profundidade máxima atingida
-        return (None, 0)
+        return (None, 0, 1)
 
     valid_locations = get_valid_locations(board)
     if maximizing_player:
         value = -np.Inf
         column = np.random.choice(valid_locations)
+        total_nodes = 1
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 2)
-            new_score = minimax(temp_board, depth - 1, alpha, beta, False)[1]
+            new_score, new_nodes = minimax(temp_board, depth - 1, alpha, beta, False)[1:]
             if new_score > value:
                 value = new_score
                 column = col
+            total_nodes += new_nodes
             alpha = max(alpha, value)
             if alpha >= beta:
                 break  # Poda Alfa-Beta
-        return column, value
+        return column, value, total_nodes
 
     else:  # minimizing player
         value = np.Inf
-        # column = np.random.choice(valid_locations)
+        column = np.random.choice(valid_locations)
+        total_nodes = 1
         for col in valid_locations:
             temp_board = board.copy()
             drop_piece(temp_board, col, 1)
-            new_score = minimax(temp_board, depth - 1, alpha, beta, True)[1]
+            new_score, new_nodes = minimax(temp_board, depth - 1, alpha, beta, True)[1:]
             if new_score < value:
                 value = new_score
                 column = col
+            total_nodes += new_nodes
             beta = min(beta, value)
             if alpha >= beta:
                 break  # Poda Alfa-Beta
-        return column, value
+        return column, value, total_nodes
 
 
 # ----------------------------------------------------------------------------------
@@ -178,17 +160,16 @@ while not game_over:
 
     # Movimento da IA
     else:
-        col, minimax_score = minimax(board, 4, -np.Inf, np.Inf, True)
+        col, minimax_score, nodes = minimax(board, 4, -np.Inf, np.Inf, True)
         if valid_location(board, col):
             drop_piece(board, col, 2)
             if is_winning_move(board, 2):
                 print("Jogador 2 Vence!!!")
                 game_over = True
 
-    nos_explorados += nos_explorados_contador(board, 4, turn == 1)
     print(board)
     print(" ")
     turn += 1
     turn = turn % 2
 
-print("Número de nós explorados:", nos_explorados)
+print("Número de nós explorados:", nodes)
