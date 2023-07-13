@@ -76,7 +76,7 @@ def minimax(board, depth, maximizing_player):
     elif len(get_valid_locations(board)) == 0:  # jogo empatado
         return (None, 0, 1)  # retorna 1 como a contagem de nós para um jogo empatado
     elif depth == 0:  # profundidade máxima atingida
-        return (None, evaluate_board(board)[0], 1)  # usa a função de avaliação heurística para avaliar o tabuleiro atual
+        return (None, evaluate_board(board)[0], evaluate_board(board)[1])  # usa a função de avaliação heurística para avaliar o tabuleiro atual
 
     valid_locations = get_valid_locations(board)
     if maximizing_player:
@@ -213,6 +213,7 @@ while not game_over:
     # movimento da IA
     else:
         col, minimax_score, nodes = minimax(board, 4, True)
+        nodes += nodes
         if valid_location(board, col):
             drop_piece(board, col, 2)
             if is_winning_move(board, 2):

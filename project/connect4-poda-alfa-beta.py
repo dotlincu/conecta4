@@ -159,6 +159,7 @@ while not game_over:
     # movimento da IA
     else:
         col, minimax_score, nodes = minimax(board, 4, -np.Inf, np.Inf, True)
+        nodes += nodes
         if valid_location(board, col):
             drop_piece(board, col, 2)
             if is_winning_move(board, 2):
